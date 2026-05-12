@@ -2,20 +2,22 @@
 
 A recruiter-focused IT operations and support workflow platform built with Flask, Python, SQLite, SQLAlchemy, Chart.js analytics, and a custom HTML/CSS interface.
 
-## Project Overview
+## Live Demo
 
-This application simulates the type of internal ticket management system used by IT support, technology operations, and business systems teams. The goal of the project is to demonstrate practical full-stack development, systems analysis, workflow design, dashboard reporting, and operational analytics in a way that connects directly to real entry-level technology roles.
+[View the live project on Render](https://it-support-ticket-tracker.onrender.com/)
 
-Users can log in, create support tickets, assign technicians, update ticket status, add operational notes, monitor SLA status, filter ticket queues, export reports, and visualize operational data through dashboard analytics.
-
-## Demo Login
-
-Use the following credentials when running the app locally:
+Demo credentials:
 
 ```text
 Username: demo
 Password: password123
 ```
+
+## Project Overview
+
+This application simulates the type of internal ticket management system used by IT support, technology operations, and business systems teams. The goal of the project is to demonstrate practical full-stack development, systems analysis, workflow design, dashboard reporting, and operational analytics in a way that connects directly to real entry-level technology roles.
+
+Users can log in, create support tickets, assign technicians, update ticket status, add operational notes, monitor SLA status, filter ticket queues, export reports, and visualize operational data through dashboard analytics.
 
 ## Key Features
 
@@ -72,6 +74,7 @@ Password: password123
 - Jinja templates
 - CSV reporting
 - Werkzeug password hashing
+- Render deployment
 
 ## Local Setup
 
@@ -135,31 +138,26 @@ http://localhost:10000
 
 ## Render Deployment
 
-This repository includes a `render.yaml` configuration for easy cloud deployment.
+This project is deployed live on Render:
 
-To deploy:
+[https://it-support-ticket-tracker.onrender.com/](https://it-support-ticket-tracker.onrender.com/)
 
-1. Push the repository to GitHub.
-2. Create a new Web Service on Render.
-3. Connect the GitHub repository.
-4. Render will automatically detect the `render.yaml` configuration.
-5. Deploy the application.
-
-The production server uses Gunicorn.
+The repository includes a `render.yaml` configuration and uses Gunicorn with a WSGI entrypoint for production deployment.
 
 ## Recruiter Walkthrough
 
 A suggested walkthrough for this project:
 
-1. Log in using the demo account.
-2. Review dashboard metrics such as open tickets, high-priority tickets, resolved tickets, and SLA overdue tickets.
-3. Analyze the dashboard charts for ticket priority, technician workload, SLA compliance, and ticket status.
-4. Create a new ticket and assign a priority, category, and technician.
-5. Open the ticket detail page and update the status.
-6. Add an analyst note to show the operational history workflow.
-7. Use filters on the ticket queue to search by status, priority, or technician.
-8. Export the CSV report to demonstrate reporting functionality.
-9. Log out using the confirmation page.
+1. Open the live Render demo.
+2. Log in using the demo account.
+3. Review dashboard metrics such as open tickets, high-priority tickets, resolved tickets, and SLA overdue tickets.
+4. Analyze the dashboard charts for ticket priority, technician workload, SLA compliance, and ticket status.
+5. Create a new ticket and assign a priority, category, and technician.
+6. Open the ticket detail page and update the status.
+7. Add an analyst note to show the operational history workflow.
+8. Use filters on the ticket queue to search by status, priority, or technician.
+9. Export the CSV report to demonstrate reporting functionality.
+10. Log out using the confirmation page.
 
 ## Career Relevance
 
