@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="logout-wrapper">
+    <div class="logout-card">
+        <h2>Log Out</h2>
+        <p>Are you sure you want to end your support operations session?</p>
+
+        <form method="POST">
+            <button type="submit" class="danger-button">Yes, Log Me Out</button>
+        </form>
+
+        <a class="secondary-link" href="{{ url_for('dashboard') }}">Cancel and Return to Dashboard</a>
+    </div>
+</div>
+
+{% endblock %}
