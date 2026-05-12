@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>{{ ticket.title }}</h2>
+
+<div class="detail-card">
+    <p><strong>Priority:</strong> {{ ticket.priority }}</p>
+    <p><strong>Status:</strong> {{ ticket.status }}</p>
+    <p><strong>Created:</strong> {{ ticket.created_at }}</p>
+
+    <hr>
+
+    <p>{{ ticket.description }}</p>
+</div>
+
+{% endblock %}
