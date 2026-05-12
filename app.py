@@ -1,5 +1,6 @@
 import csv
 import io
+import os
 from datetime import datetime, timedelta
 from functools import wraps
 
@@ -9,8 +10,8 @@ from sqlalchemy import inspect, text
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'change-this-secret-key-before-production'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tickets.db'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'change-this-secret-key-before-production')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///tickets.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 DB = SQLAlchemy(app)
@@ -75,6 +76,13 @@ def migrate_database():
             DB.session.execute(text(statement))
 
     DB.session.commit()
+
+
+def initialize_database():
+    with app.app_context():
+        DB.create_all()
+        migrate_database()
+        seed_demo_user()
 
 
 def login_required(route):
@@ -367,10 +375,7 @@ def seed_data():
     return redirect(url_for('dashboard'))
 
 
-if __name__ == '__main__':
-    with app.app_context():
-        DB.create_all()
-        migrate_database()
-        seed_demo_user()
+initialize_database()
 
+if __name__ == '__main__':
     app.run(debug=True)
