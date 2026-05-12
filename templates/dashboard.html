@@ -2,22 +2,43 @@
 
 {% block content %}
 
-<h2>Operations Dashboard</h2>
+<div class="page-header">
+    <div>
+        <h2>Operations Dashboard</h2>
+        <p>Monitor support workload, ticket priority, SLA status, and technician activity.</p>
+    </div>
+    <div class="header-actions">
+        <a class="button-link" href="{{ url_for('seed_data') }}">Load Demo Data</a>
+        <a class="button-link secondary" href="{{ url_for('export_report') }}">Export CSV</a>
+    </div>
+</div>
 
 <div class="card-grid">
-    <div class="card">
-        <h3>Total Tickets</h3>
-        <p>{{ total_tickets }}</p>
+    <div class="card"><h3>Total Tickets</h3><p>{{ total_tickets }}</p></div>
+    <div class="card"><h3>Open</h3><p>{{ open_tickets }}</p></div>
+    <div class="card"><h3>In Progress</h3><p>{{ in_progress }}</p></div>
+    <div class="card"><h3>Resolved</h3><p>{{ resolved }}</p></div>
+    <div class="card"><h3>High Priority</h3><p>{{ high_priority }}</p></div>
+    <div class="card"><h3>SLA Overdue</h3><p>{{ overdue }}</p></div>
+</div>
+
+<div class="analytics-grid">
+    <div class="panel">
+        <h3>Priority Breakdown</h3>
+        <ul class="metric-list">
+            {% for label, count in priority_counts.items() %}
+                <li><span>{{ label }}</span><strong>{{ count }}</strong></li>
+            {% endfor %}
+        </ul>
     </div>
 
-    <div class="card">
-        <h3>Open Tickets</h3>
-        <p>{{ open_tickets }}</p>
-    </div>
-
-    <div class="card">
-        <h3>High Priority</h3>
-        <p>{{ high_priority }}</p>
+    <div class="panel">
+        <h3>Status Breakdown</h3>
+        <ul class="metric-list">
+            {% for label, count in status_counts.items() %}
+                <li><span>{{ label }}</span><strong>{{ count }}</strong></li>
+            {% endfor %}
+        </ul>
     </div>
 </div>
 
@@ -27,20 +48,26 @@
     <tr>
         <th>ID</th>
         <th>Title</th>
+        <th>Category</th>
         <th>Priority</th>
         <th>Status</th>
+        <th>Assigned To</th>
+        <th>SLA</th>
     </tr>
 
     {% for ticket in tickets %}
     <tr>
         <td>{{ ticket.id }}</td>
-        <td>
-            <a href="{{ url_for('ticket_detail', ticket_id=ticket.id) }}">
-                {{ ticket.title }}
-            </a>
-        </td>
-        <td>{{ ticket.priority }}</td>
-        <td>{{ ticket.status }}</td>
+        <td><a href="{{ url_for('ticket_detail', ticket_id=ticket.id) }}">{{ ticket.title }}</a></td>
+        <td>{{ ticket.category }}</td>
+        <td><span class="badge priority-{{ ticket.priority|lower }}">{{ ticket.priority }}</span></td>
+        <td><span class="badge status-{{ ticket.status|lower|replace(' ', '-') }}">{{ ticket.status }}</span></td>
+        <td>{{ ticket.assigned_to }}</td>
+        <td><span class="badge sla-{{ ticket.sla_status|lower|replace(' ', '-') }}">{{ ticket.sla_status }}</span></td>
+    </tr>
+    {% else %}
+    <tr>
+        <td colspan="7">No tickets yet. Create a ticket or load demo data to get started.</td>
     </tr>
     {% endfor %}
 </table>
