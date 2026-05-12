@@ -111,12 +111,15 @@ def inject_user():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        user = User.query.filter_by(username=request.form['username']).first()
-        if user and check_password_hash(user.password_hash, request.form['password']):
+        user = User.query.filter_by(username=request.form.get('username')).first()
+
+        if user and check_password_hash(user.password_hash, request.form.get('password', '')):
             session['user_id'] = user.id
             session['username'] = user.username
             return redirect(url_for('dashboard'))
+
         flash('Invalid username or password.')
+
     return render_template('login.html')
 
 
@@ -130,6 +133,7 @@ def logout():
 @login_required
 def dashboard():
     tickets = Ticket.query.order_by(Ticket.created_at.desc()).all()
+
     total_tickets = Ticket.query.count()
     open_tickets = Ticket.query.filter_by(status='Open').count()
     in_progress = Ticket.query.filter_by(status='In Progress').count()
@@ -142,6 +146,7 @@ def dashboard():
         'Medium': Ticket.query.filter_by(priority='Medium').count(),
         'Low': Ticket.query.filter_by(priority='Low').count(),
     }
+
     status_counts = {
         'Open': open_tickets,
         'In Progress': in_progress,
@@ -171,36 +176,54 @@ def tickets():
     assigned_to = request.args.get('assigned_to', '')
 
     ticket_query = Ticket.query
+
     if query:
         ticket_query = ticket_query.filter(
-            (Ticket.title.ilike(f'%{query}%')) | (Ticket.description.ilike(f'%{query}%'))
+            (Ticket.title.ilike(f'%{query}%')) |
+            (Ticket.description.ilike(f'%{query}%'))
         )
+
     if status:
         ticket_query = ticket_query.filter_by(status=status)
+
     if priority:
         ticket_query = ticket_query.filter_by(priority=priority)
+
     if assigned_to:
         ticket_query = ticket_query.filter(Ticket.assigned_to.ilike(f'%{assigned_to}%'))
 
     tickets = ticket_query.order_by(Ticket.created_at.desc()).all()
-    return render_template('tickets.html', tickets=tickets, query=query, status=status, priority=priority, assigned_to=assigned_to)
+
+    return render_template(
+        'tickets.html',
+        tickets=tickets,
+        query=query,
+        status=status,
+        priority=priority,
+        assigned_to=assigned_to
+    )
 
 
 @app.route('/ticket/<int:ticket_id>', methods=['GET', 'POST'])
 @login_required
 def ticket_detail(ticket_id):
     ticket = Ticket.query.get_or_404(ticket_id)
+
     if request.method == 'POST':
-        ticket.status = request.form['status']
-        ticket.priority = request.form['priority']
-        ticket.assigned_to = request.form['assigned_to'] or 'Unassigned'
+        ticket.status = request.form.get('status', ticket.status)
+        ticket.priority = request.form.get('priority', ticket.priority)
+        ticket.assigned_to = request.form.get('assigned_to', 'Unassigned')
+
         if ticket.status == 'Resolved' and not ticket.resolved_at:
             ticket.resolved_at = datetime.utcnow()
         elif ticket.status != 'Resolved':
             ticket.resolved_at = None
+
         DB.session.commit()
         flash('Ticket updated successfully.')
+
         return redirect(url_for('ticket_detail', ticket_id=ticket.id))
+
     return render_template('ticket_detail.html', ticket=ticket)
 
 
@@ -208,12 +231,19 @@ def ticket_detail(ticket_id):
 @login_required
 def add_note(ticket_id):
     ticket = Ticket.query.get_or_404(ticket_id)
-    note_text = request.form['note'].strip()
+    note_text = request.form.get('note', '').strip()
+
     if note_text:
-        note = TicketNote(ticket_id=ticket.id, author=session.get('username', 'Support Analyst'), note=note_text)
+        note = TicketNote(
+            ticket_id=ticket.id,
+            author=session.get('username', 'Support Analyst'),
+            note=note_text
+        )
+
         DB.session.add(note)
         DB.session.commit()
         flash('Note added.')
+
     return redirect(url_for('ticket_detail', ticket_id=ticket.id))
 
 
@@ -222,15 +252,19 @@ def add_note(ticket_id):
 def create_ticket():
     if request.method == 'POST':
         new_ticket = Ticket(
-            title=request.form['title'],
-            description=request.form['description'],
-            category=request.form['category'],
-            priority=request.form['priority'],
-            assigned_to=request.form['assigned_to'] or 'Unassigned'
+            title=request.form.get('title', 'Untitled Ticket'),
+            description=request.form.get('description', ''),
+            category=request.form.get('category', 'General Support'),
+            priority=request.form.get('priority', 'Medium'),
+            assigned_to=request.form.get('assigned_to', 'Unassigned')
         )
+
         DB.session.add(new_ticket)
         DB.session.commit()
+
+        flash('Ticket created successfully.')
         return redirect(url_for('dashboard'))
+
     return render_template('create_ticket.html')
 
 
@@ -238,9 +272,22 @@ def create_ticket():
 @login_required
 def export_report():
     tickets = Ticket.query.order_by(Ticket.created_at.desc()).all()
+
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(['ID', 'Title', 'Category', 'Priority', 'Status', 'Assigned To', 'Created At', 'SLA Due At', 'SLA Status'])
+
+    writer.writerow([
+        'ID',
+        'Title',
+        'Category',
+        'Priority',
+        'Status',
+        'Assigned To',
+        'Created At',
+        'SLA Due At',
+        'SLA Status'
+    ])
+
     for ticket in tickets:
         writer.writerow([
             ticket.id,
@@ -253,6 +300,7 @@ def export_report():
             ticket.sla_due_at,
             ticket.sla_status,
         ])
+
     return Response(
         output.getvalue(),
         mimetype='text/csv',
@@ -270,11 +318,13 @@ def seed_data():
             Ticket(title='New hire email setup', description='Create mailbox and assign standard onboarding permissions.', category='Account Access', priority='Low', assigned_to='Taylor Brooks'),
             Ticket(title='Printer offline in finance office', description='Shared office printer is unavailable to the finance team.', category='Hardware', priority='Medium', assigned_to='Unassigned'),
         ]
+
         DB.session.add_all(demo_tickets)
         DB.session.commit()
         flash('Demo tickets added.')
     else:
         flash('Demo data already exists.')
+
     return redirect(url_for('dashboard'))
 
 
@@ -283,4 +333,5 @@ if __name__ == '__main__':
         DB.create_all()
         migrate_database()
         seed_demo_user()
+
     app.run(debug=True)
