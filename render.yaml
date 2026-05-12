@@ -3,5 +3,5 @@ services:
     name: it-support-ticket-tracker
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn wsgi:application
     plan: free
