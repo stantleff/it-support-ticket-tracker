@@ -5,6 +5,7 @@ from functools import wraps
 
 from flask import Flask, Response, flash, redirect, render_template, request, session, url_for
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import inspect, text
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
@@ -54,6 +55,26 @@ class TicketNote(DB.Model):
     author = DB.Column(DB.String(100), default='Support Analyst')
     note = DB.Column(DB.Text, nullable=False)
     created_at = DB.Column(DB.DateTime, default=datetime.utcnow)
+
+
+def migrate_database():
+    inspector = inspect(DB.engine)
+    if 'ticket' not in inspector.get_table_names():
+        return
+
+    existing_columns = {column['name'] for column in inspector.get_columns('ticket')}
+    migrations = {
+        'category': "ALTER TABLE ticket ADD COLUMN category VARCHAR(80) NOT NULL DEFAULT 'General Support'",
+        'assigned_to': "ALTER TABLE ticket ADD COLUMN assigned_to VARCHAR(100) DEFAULT 'Unassigned'",
+        'updated_at': 'ALTER TABLE ticket ADD COLUMN updated_at DATETIME',
+        'resolved_at': 'ALTER TABLE ticket ADD COLUMN resolved_at DATETIME',
+    }
+
+    for column_name, statement in migrations.items():
+        if column_name not in existing_columns:
+            DB.session.execute(text(statement))
+
+    DB.session.commit()
 
 
 def login_required(route):
@@ -260,5 +281,6 @@ def seed_data():
 if __name__ == '__main__':
     with app.app_context():
         DB.create_all()
+        migrate_database()
         seed_demo_user()
     app.run(debug=True)
