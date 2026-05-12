@@ -103,6 +103,21 @@ def seed_demo_user():
         DB.session.commit()
 
 
+def count_by_field(tickets, field_name):
+    counts = {}
+    for ticket in tickets:
+        value = getattr(ticket, field_name) or 'Unassigned'
+        counts[value] = counts.get(value, 0) + 1
+    return counts
+
+
+def build_chart_payload(labels, counts):
+    return {
+        'labels': labels,
+        'data': [counts.get(label, 0) for label in labels]
+    }
+
+
 @app.context_processor
 def inject_user():
     return {'current_user': current_user()}
@@ -157,6 +172,25 @@ def dashboard():
         'Resolved': resolved,
     }
 
+    sla_labels = ['On Track', 'Overdue', 'Met', 'Missed']
+    sla_counts = {label: 0 for label in sla_labels}
+    for ticket in tickets:
+        sla_counts[ticket.sla_status] = sla_counts.get(ticket.sla_status, 0) + 1
+
+    technician_counts = count_by_field(tickets, 'assigned_to')
+    top_technicians = sorted(technician_counts.items(), key=lambda item: item[1], reverse=True)[:6]
+    technician_chart = {
+        'labels': [name for name, _ in top_technicians] or ['No Tickets'],
+        'data': [count for _, count in top_technicians] or [0]
+    }
+
+    chart_data = {
+        'priority': build_chart_payload(['High', 'Medium', 'Low'], priority_counts),
+        'status': build_chart_payload(['Open', 'In Progress', 'Resolved'], status_counts),
+        'sla': build_chart_payload(sla_labels, sla_counts),
+        'technicians': technician_chart,
+    }
+
     return render_template(
         'dashboard.html',
         total_tickets=total_tickets,
@@ -167,7 +201,8 @@ def dashboard():
         overdue=overdue,
         tickets=tickets[:8],
         priority_counts=priority_counts,
-        status_counts=status_counts
+        status_counts=status_counts,
+        chart_data=chart_data
     )
 
 
