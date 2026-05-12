@@ -11,12 +11,25 @@
     <label>Description</label>
     <textarea name="description" required></textarea>
 
+    <label>Category</label>
+    <select name="category" required>
+        <option>General Support</option>
+        <option>Account Access</option>
+        <option>Hardware</option>
+        <option>Software</option>
+        <option>Network</option>
+        <option>Security</option>
+    </select>
+
     <label>Priority</label>
-    <select name="priority">
+    <select name="priority" required>
         <option>Low</option>
         <option>Medium</option>
         <option>High</option>
     </select>
+
+    <label>Assigned Technician</label>
+    <input type="text" name="assigned_to" placeholder="Unassigned, Jordan Lee, Morgan Smith, etc.">
 
     <button type="submit">Create Ticket</button>
 </form>
