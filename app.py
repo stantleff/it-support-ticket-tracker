@@ -123,10 +123,14 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/logout')
+@app.route('/logout', methods=['GET', 'POST'])
+@login_required
 def logout():
-    session.clear()
-    return redirect(url_for('login'))
+    if request.method == 'POST':
+        session.clear()
+        flash('You have been logged out successfully.')
+        return redirect(url_for('login'))
+    return render_template('logout.html')
 
 
 @app.route('/')
