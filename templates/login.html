@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | IT Support Ticket Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="login-page">
+    <main class="login-container">
+        <section class="login-card">
+            <h1>IT Support Ticket Tracker</h1>
+            <p class="muted">Sign in to access the support operations dashboard.</p>
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="flash-message">
+                        {% for message in messages %}
+                            <p>{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <label>Username</label>
+                <input type="text" name="username" placeholder="demo" required>
+
+                <label>Password</label>
+                <input type="password" name="password" placeholder="password123" required>
+
+                <button type="submit">Log In</button>
+            </form>
+
+            <div class="demo-box">
+                <strong>Demo Login</strong>
+                <p>Username: demo</p>
+                <p>Password: password123</p>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
